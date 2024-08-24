@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<robot name="cannon">
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <cylinder length="0.5" radius="0.5"/>
+      </geometry>
+      <material name="gray">
+        <color rgba="0.5 0.5 0.5 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="0.5" radius="0.5"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="50"/>
+      <inertia ixx="10.4" ixy="0.0" ixz="0.0" iyy="10.4" iyz="0.0" izz="6.25"/>
+    </inertial>
+  </link>
+
+  <link name="barrel">
+    <visual>
+      <geometry>
+        <cylinder length="2.0" radius="0.2"/>
+      </geometry>
+      <material name="dark_gray">
+        <color rgba="0.2 0.2 0.2 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="2.0" radius="0.2"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="30"/>
+      <inertia ixx="10.05" ixy="0.0" ixz="0.0" iyy="10.05" iyz="0.0" izz="0.6"/>
+    </inertial>
+  </link>
+
+  <joint name="base_to_barrel" type="revolute">
+    <parent link="base_link"/>
+    <child link="barrel"/>
+    <origin xyz="0 0 0.25" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.5" upper="1.5" effort="1000.0" velocity="0.5"/>
+  </joint>
+
+  <link name="cannonball">
+    <visual>
+      <geometry>
+        <sphere radius="0.1"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0 0 0 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.1"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="5"/>
+      <inertia ixx="0.02" ixy="0.0" ixz="0.0" iyy="0.02" iyz="0.0" izz="0.02"/>
+    </inertial>
+  </link>
+
+  <joint name="barrel_to_cannonball" type="prismatic">
+    <parent link="barrel"/>
+    <child link="cannonball"/>
+    <origin xyz="0 0 1.0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="0" upper="2.0" effort="1000.0" velocity="50.0"/>
+  </joint>
+</robot>
