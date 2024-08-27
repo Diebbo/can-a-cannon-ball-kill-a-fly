@@ -1,6 +1,7 @@
 import pybullet as p
 import math
 import pybullet_data
+import time
 
 # Initialize PyBullet
 physicsClient = p.connect(p.GUI)
@@ -38,7 +39,47 @@ cannonballId = p.createMultiBody(baseMass=cannonball_mass,
                                  baseVisualShapeIndex=visualShapeId,
                                  basePosition=[x + 2.1, y, z])  # Position the ball just in front of the cannon barrel
 
-# Run the simulation
-p.setRealTimeSimulation(1)
-input("Press Enter to exit...")
+# Add a debug parameter for fire speed
+fire_speed = p.addUserDebugParameter("Fire Speed", 0, 100, 50)
+x_angle = p.addUserDebugParameter("Angle X Axis", 0, 90, 45)
+y_angle = p.addUserDebugParameter("Angle Y Axis", 0, 90, 45)
+
+# Simulation loop
+simulation_time = 20  # seconds
+dt = 1./240.  # Time step of 1/240 seconds (240 Hz)
+steps = int(simulation_time / dt)
+
+for i in range(steps):
+    # Check if spacebar is pressed to fire the cannon
+    keys = p.getKeyboardEvents()
+    if 32 in keys and keys[32] == 3:  # 32 is the ASCII code for spacebar, 3 means 'released'
+        current_speed = p.readUserDebugParameter(fire_speed)
+        current_x_angle = p.readUserDebugParameter(x_angle)
+        current_y_angle = p.readUserDebugParameter(y_angle)
+        # Calculate the velocity vector of the cannonball
+        vx = current_speed * math.cos(math.radians(current_x_angle))
+        vy = current_speed * math.cos(math.radians(current_y_angle))
+        vz = 0
+        p.resetBaseVelocity(cannonballId, [vx, vy, vz])
+        print(f"Firing cannon with speed: {current_speed} m/s, angle: ({current_y_angle}, {current_x_angle})  degrees")
+
+    # check if cannonball is out of bounds
+    pos, _ = p.getBasePositionAndOrientation(cannonballId)
+    if pos[0] > 10 or pos[1] > 10 or pos[2] < 0:
+        print("Cannonball out of bounds")
+        p.resetBasePositionAndOrientation(cannonballId, [x + 2.1, y, z], [0, 0, 0, 1])
+    
+    # Step the simulation
+    p.stepSimulation()
+    
+    # Get cannonball position and velocity
+    pos, orn = p.getBasePositionAndOrientation(cannonballId)
+    vel, _ = p.getBaseVelocity(cannonballId)
+    
+    # Print cannonball status every 60 steps (about 4 times per second)
+    if i % 60 == 0:
+        print(f"Time: {i*dt:.2f}s, Position: {pos}, Velocity: {vel}")
+    
+    time.sleep(dt)  # to run simulation in real-time
+
 p.disconnect()
